@@ -1,0 +1,11 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+python-dotenv==1.1.0
+groq==0.25.0
+pydantic==2.11.4
+psycopg[binary]>=3.2.0,<4.0.0
+opencv-python>=4.8.0,<4.10.0
+mediapipe>=0.10.0,<=0.10.21
+numpy>=1.24.0,<2.0.0
+protobuf>=4.25.3,<5.0.0
+onnxruntime>=1.17.0,<2.0.0
