@@ -1,5 +1,21 @@
 .env
 .env.local
+# Keep environment-specific secrets local while retaining the setup template.
+.env.*
+!.env.example
+# Local database copies and SQLite transaction files may contain participant data.
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
 __pycache__/
 *.pyc
 .pytest_cache/
