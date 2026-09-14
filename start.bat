@@ -9,7 +9,7 @@ if not exist "%PYTHON_EXE%" (
 )
 set "PYTHONPATH="
 start "" "http://127.0.0.1:8002/"
-echo CogniTrack is running at http://127.0.0.1:8002/
+echo Starting CogniTrack at http://127.0.0.1:8002/ ...
 echo Press Ctrl+C to stop it.
 "%PYTHON_EXE%" -m uvicorn main:app --app-dir backend --host 0.0.0.0 --port 8002
 pause
