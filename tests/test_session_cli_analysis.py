@@ -1,9 +1,30 @@
 import sys
+import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
 from session_cli_analysis import build_session_cli_summary
+
+
+def test_session_cli_summary_ignores_nonfinite_reference_values():
+    for invalid in (float("nan"), float("inf"), float("-inf")):
+        summary = build_session_cli_summary(
+            user_id="test-user",
+            session_id="test-session",
+            rows=[{"task_number": 1, "combined_cli": 30}],
+            baseline_cli=invalid,
+            post_cli=invalid,
+            created_at="now",
+        )
+
+        assert summary["average_cli"] == 30
+        for field in (
+            "baseline_cli", "post_cli", "task_induced_change",
+            "recovery_change", "peak_change", "exposure_above_baseline",
+        ):
+            assert summary[field] is None, field
+        json.dumps(summary, allow_nan=False)
 
 
 def test_session_cli_summary_is_keyed_and_calculates_change():
@@ -43,4 +64,3 @@ def test_session_cli_summary_is_safe_without_model_rows():
     assert summary["sample_count"] == 0
     assert summary["absolute_change"] is None
     assert summary["task_cli"] == {}
-

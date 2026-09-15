@@ -55,6 +55,8 @@ def build_session_cli_summary(
     created_at: str,
 ) -> dict[str, Any]:
     """Build a deterministic summary from existing model output rows."""
+    baseline_cli = _number(baseline_cli)
+    post_cli = _number(post_cli)
     samples: list[tuple[dict[str, Any], float]] = []
     for row in rows:
         value = _cli_value(row)
@@ -105,4 +107,3 @@ def build_session_cli_summary(
         "calculation_version": "session-cli-change-v1",
         "created_at": created_at,
     }
-
