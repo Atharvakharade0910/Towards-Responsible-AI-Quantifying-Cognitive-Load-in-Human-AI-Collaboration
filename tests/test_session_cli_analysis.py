@@ -7,6 +7,28 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from session_cli_analysis import build_session_cli_summary
 
 
+def test_session_cli_summary_skips_numbers_too_large_for_float():
+    for oversized in (10 ** 400, -(10 ** 400)):
+        summary = build_session_cli_summary(
+            user_id="test-user",
+            session_id="test-session",
+            rows=[
+                {"task_number": 1, "combined_cli": oversized},
+                {"task_number": 1, "combined_cli": oversized, "cli_score": 30},
+                {"task_number": 1, "combined_cli": 50},
+            ],
+            baseline_cli=oversized,
+            post_cli=oversized,
+            created_at="now",
+        )
+
+        assert summary["sample_count"] == 2
+        assert summary["average_cli"] == 40
+        assert summary["baseline_cli"] is None
+        assert summary["post_cli"] is None
+        json.dumps(summary, allow_nan=False)
+
+
 def test_session_cli_summary_ignores_nonfinite_reference_values():
     for invalid in (float("nan"), float("inf"), float("-inf")):
         summary = build_session_cli_summary(
