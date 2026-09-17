@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass, field
+from math import isfinite
 from typing import Any
 
 
@@ -105,7 +106,10 @@ class SecondEmotionAggregator:
 
         try:
             confidence = float(value)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
+            return 0.0
+
+        if not isfinite(confidence):
             return 0.0
 
         return max(
