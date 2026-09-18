@@ -8,6 +8,25 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from facial_expression_aggregator import SecondEmotionAggregator
 
 
+@pytest.mark.parametrize("previous, expected", [(None, "unknown"), ("sad", "sad")])
+def test_zero_threshold_does_not_choose_an_equal_confidence_winner(previous, expected):
+    for emotions in [("happy", "sad"), ("sad", "happy")]:
+        aggregator = SecondEmotionAggregator(elapsed_second=1, confidence_gap_threshold=0)
+        for emotion in emotions * 2:
+            aggregator.add_result({
+                "face_detected": True,
+                "emotion": emotion,
+                "model_confidence": 0.5,
+            })
+
+        result = aggregator.finalize(previous_emotion=previous)
+
+        assert result["emotion"] == expected
+        assert result["tie_break_reason"] == (
+            "previous_second_emotion" if previous else "unresolved_tie"
+        )
+
+
 @pytest.mark.parametrize("invalid", [float("nan"), float("inf"), float("-inf"), 10 ** 400])
 def test_invalid_confidence_cannot_win_a_tied_vote(invalid):
     aggregator = SecondEmotionAggregator(elapsed_second=1)

@@ -340,8 +340,8 @@ class SecondEmotionAggregator:
         # Select the confidence winner only when
         # the difference is meaningful.
         if (
-            confidence_gap
-            >= self.confidence_gap_threshold
+            confidence_gap > 0
+            and confidence_gap >= self.confidence_gap_threshold
         ):
             return (
                 highest_emotion,
