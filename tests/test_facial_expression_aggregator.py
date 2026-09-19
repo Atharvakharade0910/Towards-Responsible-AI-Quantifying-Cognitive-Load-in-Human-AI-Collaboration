@@ -8,6 +8,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from facial_expression_aggregator import SecondEmotionAggregator
 
 
+@pytest.mark.parametrize("threshold", [float("nan"), float("inf"), float("-inf"), -0.1])
+def test_confidence_gap_threshold_rejects_invalid_values(threshold):
+    with pytest.raises(ValueError, match="confidence_gap_threshold"):
+        SecondEmotionAggregator(elapsed_second=1, confidence_gap_threshold=threshold)
+
+
+@pytest.mark.parametrize("threshold", [0.0, 0.15, 2.0])
+def test_confidence_gap_threshold_accepts_finite_nonnegative_values(threshold):
+    aggregator = SecondEmotionAggregator(elapsed_second=1, confidence_gap_threshold=threshold)
+    assert aggregator.confidence_gap_threshold == threshold
+
+
 @pytest.mark.parametrize("previous, expected", [(None, "unknown"), ("sad", "sad")])
 def test_zero_threshold_does_not_choose_an_equal_confidence_winner(previous, expected):
     for emotions in [("happy", "sad"), ("sad", "happy")]:
