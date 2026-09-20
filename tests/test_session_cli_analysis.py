@@ -7,6 +7,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from session_cli_analysis import build_session_cli_summary
 
 
+def test_percentage_change_uses_unrounded_scores():
+    for end, expected in [(1.00004, 0.003), (0.99998, -0.003)]:
+        summary = build_session_cli_summary(
+            user_id="test-user",
+            session_id="test-session",
+            rows=[
+                {"elapsed_second": 1, "combined_cli": 1.00001},
+                {"elapsed_second": 2, "combined_cli": end},
+            ],
+            created_at="now",
+        )
+
+        assert summary["absolute_change"] == 0.0
+        assert summary["percentage_change"] == expected
+
+
 def test_session_cli_summary_skips_numbers_too_large_for_float():
     for oversized in (10 ** 400, -(10 ** 400)):
         summary = build_session_cli_summary(

@@ -78,7 +78,7 @@ def build_session_cli_summary(
     peak_cli = round(max(values), 4) if values else None
     minimum_cli = round(min(values), 4) if values else None
     absolute_change = round(end_cli - start_cli, 4) if start_cli is not None and end_cli is not None else None
-    percentage_change = round(absolute_change / start_cli * 100, 4) if absolute_change is not None and start_cli else None
+    percentage_change = round((end_cli - start_cli) / start_cli * 100, 4) if end_cli is not None and start_cli else None
     exposure = None
     if baseline_cli is not None and values:
         exposure = round(sum(max(0.0, value - baseline_cli) for value in values) / len(values), 4)
