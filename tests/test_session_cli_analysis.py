@@ -7,6 +7,32 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from session_cli_analysis import build_session_cli_summary
 
 
+def test_task_trend_uses_numeric_task_order():
+    summary = build_session_cli_summary(
+        user_id="test-user",
+        session_id="test-session",
+        rows=[
+            {"task_number": str(task), "combined_cli": task * 10}
+            for task in reversed(range(1, 11))
+        ],
+        created_at="now",
+    )
+
+    assert list(summary["task_cli"]) == [str(task) for task in range(1, 11)]
+    assert summary["trend_slope"] == 10.0
+
+
+def test_task_order_keeps_labels_and_unknown_after_numbers():
+    summary = build_session_cli_summary(
+        user_id="test-user",
+        session_id="test-session",
+        rows=[{"task_number": task, "combined_cli": 30} for task in (None, "warmup", "2", "10", "cooldown")],
+        created_at="now",
+    )
+
+    assert list(summary["task_cli"]) == ["2", "10", "cooldown", "warmup", "unknown"]
+
+
 def test_percentage_change_uses_unrounded_scores():
     for end, expected in [(1.00004, 0.003), (0.99998, -0.003)]:
         summary = build_session_cli_summary(

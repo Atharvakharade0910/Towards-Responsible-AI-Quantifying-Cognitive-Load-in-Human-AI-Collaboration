@@ -31,6 +31,13 @@ def _cli_value(row: dict[str, Any]) -> float | None:
     return None
 
 
+def _task_sort_key(task: str) -> tuple[int, float, str]:
+    number = _number(task)
+    if number is not None:
+        return (0, number, task)
+    return (2 if task == "unknown" else 1, 0.0, task)
+
+
 def _mean(values: Iterable[float]) -> float | None:
     values = list(values)
     return round(sum(values) / len(values), 4) if values else None
@@ -70,7 +77,7 @@ def build_session_cli_summary(
         task = str(row.get("task_number") or "unknown")
         task_values[task].append(value)
 
-    task_cli = {task: _mean(task_values[task]) for task in sorted(task_values, key=lambda item: (item == "unknown", item))}
+    task_cli = {task: _mean(task_values[task]) for task in sorted(task_values, key=_task_sort_key)}
     task_means = [value for value in task_cli.values() if value is not None]
     start_cli = values[0] if values else None
     end_cli = values[-1] if values else None
