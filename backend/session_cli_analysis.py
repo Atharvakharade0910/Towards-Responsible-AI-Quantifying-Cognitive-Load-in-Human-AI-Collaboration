@@ -16,6 +16,8 @@ CLI_FIELD_ALIASES = ("combined_cli", "cli_score", "cli", "predicted_cli")
 
 
 def _number(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return None
     try:
         number = float(value)
     except (TypeError, ValueError, OverflowError):
