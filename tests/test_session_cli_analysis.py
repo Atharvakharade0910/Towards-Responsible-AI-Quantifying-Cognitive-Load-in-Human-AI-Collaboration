@@ -7,6 +7,25 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from session_cli_analysis import build_session_cli_summary
 
 
+def test_numeric_task_zero_groups_with_string_zero():
+    summary = build_session_cli_summary(
+        user_id="test-user",
+        session_id="test-session",
+        rows=[
+            {"task_number": 0, "combined_cli": 20},
+            {"task_number": "0", "combined_cli": 40},
+            {"task_number": None, "combined_cli": 60},
+            {"task_number": "", "combined_cli": 80},
+            {"combined_cli": 100},
+        ],
+        created_at="now",
+    )
+
+    assert summary["task_cli"] == {"0": 30.0, "unknown": 80.0}
+    assert summary["task_count"] == 2
+    assert summary["sample_count"] == 5
+
+
 def test_boolean_scores_are_ignored_without_dropping_numeric_zero():
     for boolean in (True, False):
         summary = build_session_cli_summary(
