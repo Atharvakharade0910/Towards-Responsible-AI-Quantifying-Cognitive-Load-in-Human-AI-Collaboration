@@ -8,6 +8,35 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from facial_expression_aggregator import SecondEmotionAggregator
 
 
+@pytest.mark.parametrize("valid_count", [0, 2])
+def test_insufficient_valid_frames_stay_unknown_despite_previous_emotion(valid_count):
+    aggregator = SecondEmotionAggregator(elapsed_second=1)
+    for _ in range(valid_count):
+        aggregator.add_result({
+            "face_detected": True, "emotion": "happy", "model_confidence": 0.9,
+        })
+    aggregator.add_result({
+        "face_detected": False, "emotion": "happy", "model_confidence": 1.0,
+        "reason": "no_face",
+    })
+    aggregator.add_result({
+        "face_detected": True, "emotion": "unsupported", "model_confidence": 1.0,
+        "reason": "invalid_emotion",
+    })
+
+    result = aggregator.finalize(previous_emotion="happy", minimum_valid_frames=3)
+
+    assert result["emotion"] == "unknown"
+    assert result["result_status"] == "insufficient_valid_frames"
+    assert result["tie_break_reason"] is None
+    assert result["majority_confidence"] == 0.0
+    assert result["average_model_confidence"] == 0.0
+    assert result["valid_frames"] == valid_count
+    assert result["total_frames"] == valid_count + 2
+    assert result["vote_counts"] == ({"happy": valid_count} if valid_count else {})
+    assert result["invalid_reasons"] == {"no_face": 1, "invalid_emotion": 1}
+
+
 @pytest.mark.parametrize("threshold", [float("nan"), float("inf"), float("-inf"), -0.1])
 def test_confidence_gap_threshold_rejects_invalid_values(threshold):
     with pytest.raises(ValueError, match="confidence_gap_threshold"):
