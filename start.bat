@@ -8,6 +8,12 @@ if not exist "%PYTHON_EXE%" (
   exit /b 1
 )
 set "PYTHONPATH="
+"%PYTHON_EXE%" -c "import uvicorn"
+if errorlevel 1 (
+  echo The project Python environment could not load Uvicorn. Repair .venv and install requirements.txt.
+  pause
+  exit /b 1
+)
 start "" "http://127.0.0.1:8002/"
 echo Starting CogniTrack at http://127.0.0.1:8002/ ...
 echo Press Ctrl+C to stop it.
