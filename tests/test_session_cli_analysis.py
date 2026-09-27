@@ -1,10 +1,35 @@
 import sys
 import json
+from itertools import permutations
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
 from session_cli_analysis import build_session_cli_summary
+
+
+def test_session_change_is_independent_of_sample_arrival_order():
+    rows = [
+        {"elapsed_second": 1, "captured_at": "2026-01-01T00:00:01.100Z", "combined_cli": 10},
+        {"elapsed_second": 1, "captured_at": "2026-01-01T00:00:01.900Z", "combined_cli": 20},
+        {"elapsed_second": 2, "captured_at": "2026-01-01T00:00:02.100Z", "combined_cli": 30},
+    ]
+    original_rows = [dict(row) for row in rows]
+    for ordering in permutations(rows):
+        summary = build_session_cli_summary(
+            user_id="test-user",
+            session_id="test-session",
+            rows=(row for row in ordering),
+            created_at="now",
+        )
+
+        assert summary["start_cli"] == 10
+        assert summary["end_cli"] == 30
+        assert summary["absolute_change"] == 20
+        assert summary["percentage_change"] == 200
+        assert summary["average_cli"] == 20
+        assert summary["sample_count"] == 3
+    assert rows == original_rows
 
 
 def test_numeric_task_zero_groups_with_string_zero():
