@@ -8,6 +8,31 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from session_cli_analysis import build_session_cli_summary
 
 
+def test_zero_scores_preserve_changes_without_dividing_by_zero():
+    summary = build_session_cli_summary(
+        user_id="test-user",
+        session_id="test-session",
+        rows=[
+            {"elapsed_second": 1, "combined_cli": 0},
+            {"elapsed_second": 2, "combined_cli": 20},
+        ],
+        baseline_cli=0,
+        post_cli=0,
+        created_at="now",
+    )
+
+    assert summary["start_cli"] == 0
+    assert summary["absolute_change"] == 20
+    assert summary["percentage_change"] is None
+    assert summary["baseline_cli"] == 0
+    assert summary["post_cli"] == 0
+    assert summary["task_induced_change"] == 10
+    assert summary["recovery_change"] == -10
+    assert summary["peak_change"] == 20
+    assert summary["exposure_above_baseline"] == 10
+    json.dumps(summary, allow_nan=False)
+
+
 def test_session_change_is_independent_of_sample_arrival_order():
     rows = [
         {"elapsed_second": 1, "captured_at": "2026-01-01T00:00:01.100Z", "combined_cli": 10},
