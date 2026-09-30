@@ -8,6 +8,34 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from facial_expression_aggregator import SecondEmotionAggregator
 
 
+@pytest.mark.parametrize(
+    "frames, expected_emotion, expected_reason, expected_confidence",
+    [
+        ([("happy", 0.1)] * 3 + [("sad", 1.0)] * 2,
+         "happy", "clear_majority", 0.6),
+        ([("happy", 1.0)] * 2 + [("sad", 0.1)] * 2,
+         "sad", "last_two_valid_frames", 0.5),
+    ],
+)
+def test_vote_priority_overrides_confidence_totals(
+    frames, expected_emotion, expected_reason, expected_confidence,
+):
+    aggregator = SecondEmotionAggregator(elapsed_second=1)
+    for emotion, confidence in frames:
+        aggregator.add_result({
+            "face_detected": True,
+            "emotion": emotion,
+            "model_confidence": confidence,
+        })
+
+    result = aggregator.finalize()
+
+    assert result["emotion"] == expected_emotion
+    assert result["tie_break_reason"] == expected_reason
+    assert result["majority_confidence"] == expected_confidence
+    assert result["result_status"] == "success"
+
+
 @pytest.mark.parametrize("valid_count", [0, 2])
 def test_insufficient_valid_frames_stay_unknown_despite_previous_emotion(valid_count):
     aggregator = SecondEmotionAggregator(elapsed_second=1)
