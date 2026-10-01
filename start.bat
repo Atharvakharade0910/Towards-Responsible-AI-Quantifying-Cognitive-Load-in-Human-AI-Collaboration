@@ -19,5 +19,8 @@ echo Starting CogniTrack at http://127.0.0.1:8002/ ...
 echo Press Ctrl+C to stop it.
 "%PYTHON_EXE%" -m uvicorn main:app --app-dir backend --host 0.0.0.0 --port 8002
 set "COGNITRACK_EXIT_CODE=%ERRORLEVEL%"
+if not "%COGNITRACK_EXIT_CODE%"=="0" (
+  echo CogniTrack exited with error code %COGNITRACK_EXIT_CODE%. Review the messages above for details.
+)
 pause
 exit /b %COGNITRACK_EXIT_CODE%
