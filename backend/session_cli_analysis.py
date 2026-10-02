@@ -77,7 +77,7 @@ def build_session_cli_summary(
     task_values: dict[str, list[float]] = defaultdict(list)
     for row, value in samples:
         task_number = row.get("task_number")
-        task = "unknown" if task_number is None or task_number == "" else str(task_number)
+        task = (str(task_number).strip() if task_number is not None else "") or "unknown"
         task_values[task].append(value)
 
     task_cli = {task: _mean(task_values[task]) for task in sorted(task_values, key=_task_sort_key)}

@@ -8,6 +8,25 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from session_cli_analysis import build_session_cli_summary
 
 
+def test_task_labels_ignore_surrounding_whitespace():
+    summary = build_session_cli_summary(
+        user_id="test-user",
+        session_id="test-session",
+        rows=[
+            {"task_number": " 2 ", "combined_cli": 20},
+            {"task_number": 2, "combined_cli": 40},
+            {"task_number": "\t\n", "combined_cli": 60},
+            {"task_number": None, "combined_cli": 80},
+            {"task_number": " warmup ", "combined_cli": 10},
+        ],
+        created_at="now",
+    )
+
+    assert summary["task_cli"] == {"2": 30.0, "warmup": 10.0, "unknown": 70.0}
+    assert summary["task_count"] == 3
+    assert summary["sample_count"] == 5
+
+
 def test_zero_scores_preserve_changes_without_dividing_by_zero():
     summary = build_session_cli_summary(
         user_id="test-user",
