@@ -53,7 +53,15 @@ class SecondEmotionAggregator:
                 "expected_frames must be at least 1."
             )
 
-        if not isfinite(self.confidence_gap_threshold) or self.confidence_gap_threshold < 0:
+        try:
+            valid_confidence_gap_threshold = (
+                isfinite(self.confidence_gap_threshold)
+                and self.confidence_gap_threshold >= 0
+            )
+        except TypeError:
+            valid_confidence_gap_threshold = False
+
+        if not valid_confidence_gap_threshold:
             raise ValueError(
                 "confidence_gap_threshold must be finite and nonnegative."
             )

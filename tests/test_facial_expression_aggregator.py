@@ -65,7 +65,10 @@ def test_insufficient_valid_frames_stay_unknown_despite_previous_emotion(valid_c
     assert result["invalid_reasons"] == {"no_face": 1, "invalid_emotion": 1}
 
 
-@pytest.mark.parametrize("threshold", [float("nan"), float("inf"), float("-inf"), -0.1])
+@pytest.mark.parametrize(
+    "threshold",
+    [float("nan"), float("inf"), float("-inf"), -0.1, "0.15", None],
+)
 def test_confidence_gap_threshold_rejects_invalid_values(threshold):
     with pytest.raises(ValueError, match="confidence_gap_threshold"):
         SecondEmotionAggregator(elapsed_second=1, confidence_gap_threshold=threshold)
